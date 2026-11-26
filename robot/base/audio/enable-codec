@@ -1,0 +1,37 @@
+#!/bin/sh
+set -eu
+# Use an in-tree driver if the installed kernel already supplies it.
+if ! modinfo snd-soc-tlv320aic3x-i2c >/dev/null 2>&1; then
+    kernel=$(uname -r)
+    if [ "$kernel" != "6.1.84-10-rk2410-nocsf" ]; then
+        echo "Duck Base audio: missing driver for kernel $kernel" >&2
+        exit 1
+    fi
+    dkms install -j 2 -m duckbase-aic3x -v 6.1.84 -k "$kernel"
+fi
+modprobe snd-soc-tlv320aic3x-i2c
+# First registration is asynchronous. A bare ZERO can still run the rest of Duck Base.
+for attempt in 1 2 3 4 5; do
+    if [ -e /proc/asound/aic3104 ]; then
+        if grep -q '^state\.aic3104[[:space:]]*{' /var/lib/alsa/asound.state 2>/dev/null; then
+            alsactl restore aic3104
+        else
+            # V260 speaker routing with its default 50 percent software volume.
+            amixer -q -c aic3104 cset name='PCM Playback Volume' 115,115
+            amixer -q -c aic3104 cset name='Line DAC Playback Volume' 118,118
+            amixer -q -c aic3104 cset name='Line Playback Volume' 9,9
+            amixer -q -c aic3104 cset name='Line Playback Switch' on,on
+            # The on-board microphone is wired to the codec's right MIC3R input.
+            for route in 'Left PGA Mixer Mic3R' 'Left PGA Mixer Mic3L' 'Right PGA Mixer Mic3L' \
+                         'Left PGA Mixer Line1L' 'Left PGA Mixer Line1R' 'Left PGA Mixer Line2L' \
+                         'Right PGA Mixer Line1L' 'Right PGA Mixer Line1R' 'Right PGA Mixer Line2R'; do
+                amixer -q -c aic3104 sset "$route" off
+            done
+            amixer -q -c aic3104 sset 'Right PGA Mixer Mic3R' on
+            amixer -q -c aic3104 cset name='PGA Capture Switch' on,on
+            amixer -q -c aic3104 cset name='PGA Capture Volume' 60,60
+        fi
+        break
+    fi
+    sleep 1
+done

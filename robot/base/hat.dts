@@ -1,0 +1,14 @@
+/dts-v1/;
+/plugin/;
+/ {
+    /* The HAT uses the I2C3-M0 header on pins 3/5. The standard M1 USB-PD
+       peripheral is physically on the other mux, so do not probe it here. */
+    fragment@0 {
+        target-path = "/i2c@fe5c0000/fusb302@22";
+        __overlay__ { status = "disabled"; };
+    };
+    fragment@1 {
+        target = <&i2c3>;
+        __overlay__ { clock-frequency = <400000>; };
+    };
+};

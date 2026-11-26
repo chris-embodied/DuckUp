@@ -1,0 +1,13 @@
+[bus]
+port = "/dev/ttyS2"
+protocol = "feetech"
+feetech_calibration = "/etc/duck-base/calibration.toml"
+[control]
+hz = 50
+[policy]
+enabled = false
+[safety]
+limp_fall = true
+battery_empty_shutdown = false
+[audio]
+enabled = false

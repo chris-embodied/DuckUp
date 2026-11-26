@@ -1,0 +1,20 @@
+[Unit]
+Description=Microduck iPhone BLE remote
+After=bluetooth.service robotd.service
+Requires=bluetooth.service
+
+[Service]
+Type=simple
+User=radxa
+SupplementaryGroups=robot
+ExecStart=/usr/bin/python3 /opt/duck-iphone/ble.py --key /etc/duck-iphone/remote.key
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=-/run/padd/ai-input
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

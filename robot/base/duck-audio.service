@@ -1,0 +1,14 @@
+[Unit]
+Description=Enable the Duck Base HAT audio codec
+After=local-fs.target systemd-modules-load.service alsa-restore.service
+ConditionPathExists=/proc/device-tree/sound-aic3104
+
+[Service]
+Type=oneshot
+ExecStart=/opt/duck-base/enable-codec
+RemainAfterExit=yes
+TimeoutStartSec=5min
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

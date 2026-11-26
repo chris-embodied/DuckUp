@@ -1,0 +1,12 @@
+[Unit]
+Description=Initialize device-specific Duck Base identity and import optional setup
+After=local-fs.target rsetup.service NetworkManager.service bluetooth.service
+Wants=NetworkManager.service bluetooth.service
+RequiresMountsFor=/config
+Before=duck-base.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/duck-base/provision.py
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+name: Source checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -B -m unittest discover -s robot/tests
+      - run: python -B -m unittest discover -s robot/bridge-tests
+      - run: python -B -m unittest discover -s examples/find-me
+      - run: python -B examples/find-me/build.py && git diff --exit-code -- examples/find-me/index.html

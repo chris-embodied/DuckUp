@@ -1,0 +1,21 @@
+[Unit]
+Description=Duck Base static HOME driver
+ConditionPathExists=/etc/duck-base/home.key
+After=duck-provision.service
+Before=duck-base.service
+
+[Service]
+User=duckbase
+SupplementaryGroups=dialout
+RuntimeDirectory=duck-home
+RuntimeDirectoryMode=0700
+UMask=0077
+ExecStart=/opt/duck-base/robotd --params /etc/duck-base/home.toml --socket /run/duck-home/robot.sock --no-policy
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

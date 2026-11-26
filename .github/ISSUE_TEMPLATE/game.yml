@@ -1,0 +1,18 @@
+name: 新玩法 / Interaction idea
+description: 用一个可以演示的场景描述你的玩法。
+title: "[Play] "
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 人做什么？鸭子怎样回应？
+      placeholder: 我站在鸭子背后叫它。它应该转身找到我，再停稳回应。
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 怎样算成功？什么情况下该停下来？
+      placeholder: 空场时结束搜索；有两个人时先等，不任选一个。
+    validations:
+      required: true

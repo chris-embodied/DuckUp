@@ -1,0 +1,30 @@
+name: 安装与复刻 / Bring-up
+description: 记录另一只鸭子的安装结果（原卡重刷或备用卡），或指出首次失败的位置。
+title: "[Bring-up] "
+body:
+  - type: input
+    id: setup
+    attributes:
+      label: 主板、HAT、舵机型号及 App / 镜像版本
+    validations:
+      required: true
+  - type: dropdown
+    id: step
+    attributes:
+      label: 已经走到哪一步？
+      options:
+        - 写卡与启动
+        - 蓝牙状态
+        - 摄像头和测距
+        - 运动授权与 HOME
+        - 走路、表情或模型切换
+        - 全流程成功
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: 具体操作与观察结果
+      description: 成功的复刻也欢迎记录。请隐去私人地址、密钥和个人标定。
+    validations:
+      required: true

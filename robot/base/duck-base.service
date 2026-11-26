@@ -1,0 +1,24 @@
+[Unit]
+Description=Duck Base sensor telemetry and authenticated camera preview
+After=bluetooth.service duck-provision.service
+Requires=bluetooth.service duck-provision.service
+
+[Service]
+Type=simple
+User=duckbase
+SupplementaryGroups=dialout i2c video bluetooth render
+RuntimeDirectory=duck-base
+StateDirectory=duck-base
+UMask=0077
+Environment=PYTHONPATH=/opt/duck-base/tof.whl:/opt/duck-base/smbus.whl
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /opt/duck-base/base.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

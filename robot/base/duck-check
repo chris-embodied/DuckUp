@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+"""Collect fresh evidence from the same readers as the phone, with no motion access."""
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+from bus import IDS
+from sensors import RUN
+
+start = time.monotonic_ns()
+def load(name):
+    try:
+        return json.loads((RUN/name).read_bytes())
+    except (OSError, ValueError):
+        return {}
+
+deadline = time.monotonic()+30
+while True:
+    (RUN/'check-until').touch()
+    bus, tof = load('bus.json'), load('tof.json')
+    jpg = RUN/'camera.jpg'
+    now = time.monotonic_ns()
+    def fresh(doc):
+        return start < doc.get('t', 0) <= now and now-doc['t'] < 2_000_000_000
+    camera = jpg.is_file() and time.time()-jpg.stat().st_mtime < 2 and jpg.read_bytes().startswith(b'\xff\xd8')
+    ids = sorted(map(int,bus.get('servos',{}))) if fresh(bus) else []
+    result = {'servos': ids, 'imu': fresh(bus) and bus.get('imu') is True,
+              'camera_jpeg': camera, 'tof_8x8': fresh(tof) and len(tof.get('mm',[])) == 64,
+              'tof_valid_zones': sum(mm > 0 for mm in tof.get('mm',[])) if fresh(tof) else 0,
+              'audio_card': 'aic3104' in Path('/proc/asound/cards').read_text().lower() if Path('/proc/asound/cards').exists() else False}
+    ok = ids == sorted(IDS) and all(result[k] for k in ('imu','camera_jpeg','tof_8x8','tof_valid_zones','audio_card'))
+    if ok or time.monotonic() >= deadline:
+        break
+    time.sleep(.5)
+(RUN/'check-until').unlink(missing_ok=True)
+result.update(boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(), hardware_ok=bool(ok))
+print(json.dumps(result, ensure_ascii=False, indent=2))
+sys.exit(0 if ok else 1)
